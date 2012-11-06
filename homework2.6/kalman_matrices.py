@@ -1,4 +1,5 @@
-# Fill in the matrices P, F, H, R and I at the bottom
+# Write a function 'filter' that implements a multi-
+# dimensional Kalman Filter for the example given
 
 from math import *
 
@@ -137,58 +138,40 @@ class matrix:
 
 ########################################
 
-def calculate(measurements, initial_xy):
-  dt = 0.1
+# Implement the filter function below
 
-  x = matrix([[initial_xy[0]], [initial_xy[1]], [0.], [0.]]) # initial state (location and velocity)
-  u = matrix([[0.], [0.], [0.], [0.]]) # external motion
-
-  ### fill this in: ###
-  P = matrix([
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 1000, 0],
-    [0, 0, 0, 1000]
-  ])
-
-  F = matrix([
-    [1, 0, 0.1, 0],
-    [0, 1, 0, 0.1],
-    [0, 0, 1, 0],
-    [0, 0, 0, 1]
-  ])
-
-  H = matrix([
-    [1, 0, 0, 0],
-    [0, 1, 0, 0]
-  ])
-
-  R = matrix([
-    [0.1, 0],
-    [0, 0.1]
-  ])
-
-  I = matrix([
-    [1, 0, 0, 0],
-    [0, 1, 0, 0],
-    [0, 0, 1, 0],
-    [0, 0, 0, 1]
-  ])
-
-  def filter(x, P):
+def filter(x, P):
     for n in range(len(measurements)):
-      
-      # prediction
-      x = (F * x) + u
-      P = F * P * F.transpose()
-      
-      # measurement update
-      Z = matrix([measurements[n]])
-      y = Z.transpose() - (H * x)
-      S = H * P * H.transpose() + R
-      K = P * H.transpose() * S.inverse()
-      x = x + (K * y)
-      P = (I - (K * H)) * P
-    return x, P
-    
-  return filter(x, P)
+        
+        # measurement update
+        Y = matrix([[measurements[n]]]) - H * x
+        S = H * P * H.transpose() + R
+        K = P * H.transpose() * S.inverse()
+        x = x + K * Y
+        P = (I - K * H) * P
+        
+        # prediction
+        x = F * x + u
+        P = F * P * F.transpose()
+        
+        print 'x= '
+        x.show()
+        print 'P= '
+        P.show()
+
+
+
+########################################
+
+measurements = [1, 2, 3]
+
+x = matrix([[0.], [0.]]) # initial state (location and velocity)
+P = matrix([[1000., 0.], [0., 1000.]]) # initial uncertainty
+u = matrix([[0.], [0.]]) # external motion
+F = matrix([[1., 1.], [0, 1.]]) # next state function
+H = matrix([[1., 0.]]) # measurement function
+R = matrix([[1.]]) # measurement uncertainty
+I = matrix([[1., 0.], [0., 1.]]) # identity matrix
+
+filter(x, P)
+
