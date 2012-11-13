@@ -96,11 +96,29 @@ class robot:
     #
     
     def move(self, motion): # Do not change the name of this function
+        # motion = [0.0, 10.0]
+        # motion = [pi / 6.0, 10.0]
+        steering = motion[0]
+        distance = motion[1]
 
-        # ENTER YOUR CODE HERE
-        
-        return result # make sure your move function returns an instance
-                      # of the robot class with the correct coordinates.
+        new_robot = robot(self.length)
+        new_robot.bearing_noise = self.bearing_noise
+        new_robot.distance_noise = self.distance_noise
+
+        # Apply noise
+        steering2 = random.gauss(steering, self.steering_noise)
+        distance2 = random.gauss(distance, self.distance_noise)
+
+        try:
+            beta = distance2 * tan(steering2) / self.length
+            r = distance2 / beta
+        except ZeroDivisionError:
+            new_robot.set(self.x + distance2 * cos(self.orientation), self.y + distance2 * sin(self.orientation), self.orientation)
+            return new_robot
+        cx = self.x - sin(self.orientation) * r
+        cy = self.y + cos(self.orientation) * r
+        new_robot.set(cx + sin(self.orientation + beta) * r, cy - cos(self.orientation + beta) * r, (self.orientation + beta) % (2 * pi))
+        return new_robot
                       
     ############## ONLY ADD/MODIFY CODE ABOVE HERE ####################
         
