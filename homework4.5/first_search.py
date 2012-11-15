@@ -1,17 +1,4 @@
 from pprint import pprint
-# ----------
-# User Instructions:
-# 
-# Define a function, search() that takes no input
-# and returns a list
-# in the form of [optimal path length, x, y]. For
-# the grid shown below, your function should output
-# [11, 4, 5].
-#
-# If there is no valid path from the start point
-# to the goal, your function should return the string
-# 'fail'
-# ----------
 
 # Grid format:
 #   0 = Navigable space
@@ -21,7 +8,7 @@ grid = [[0, 0, 1, 0, 0, 0],
         [0, 0, 1, 0, 0, 0],
         [0, 0, 0, 0, 1, 0],
         [0, 0, 1, 1, 1, 0],
-        [0, 0, 0, 0, 1, 0]]
+        [0, 0, 0, 0, 0, 0]]
 
 init = [0, 0]
 goal = [len(grid)-1, len(grid[0])-1] # Make sure that the goal definition stays in the function.
@@ -36,30 +23,64 @@ delta_name = ['^', '<', 'v', '>']
 cost = 1
 
 def search():
-    # ----------------------------------------
-    # insert code here and make sure it returns the appropriate result
-    # ----------------------------------------
     open_list = []
-    count_g = 0
-    init.insert(0, count_g)
-    open_list.append(init)
+    g_value = 0
+
+    # Start at the start point
+    open_list.append([g_value, init[0], init[1]])
+
+    # Create the check matrix as same size as grid
+    check = [ [0 for col in range(len(grid[0]))] for row in range(len(grid)) ]
+    for row in range(len(grid)):
+        for col in range(len(grid[row])):
+            check[row][col] = grid[row][col]
+
+    # Check the start point
+    check[init[0]][init[1]] = 1
+
+    # Create the expand matrix
+    expand = [ [0 for col in range(len(grid[0]))] for row in range(len(grid)) ]
+    for row in range(len(grid)):
+        for col in range(len(grid[row])):
+            if grid[row][col]:
+                expand[row][col] = -1
+
+    expand_count = 1
+
     while len(open_list):
         valid_list = []
-        count_g += 1
+        g_value += 1
         for i in range(len(open_list)):
+            row = open_list[i][1]
+            col = open_list[i][2]
             for move in delta:
-                row = open_list[i][1] + move[0]
-                col = open_list[i][2] + move[1]
-                grid[open_list[i][1]][open_list[i][2]] = 1
-                if row < 0 or row > len(grid) - 1 or col < 0 or col > len(grid[0]) - 1 or grid[row][col] == 1:
+                row2 = open_list[i][1] + move[0]
+                col2 = open_list[i][2] + move[1]
+                # grid[open_list[i][1]][open_list[i][2]] = 1
+
+                # Check the boundary and checked status
+                if row2 < 0 or row2 > len(grid) - 1 or col2 < 0 or col2 > len(grid[0]) - 1 or grid[row2][col2] == 1 or check[row2][col2] == 1:
                     continue
-                if row == goal[0] and col == goal[1]:
-                    return [count_g, row, col]
-                valid_list.append([count_g, row, col])
+                # Exam with our goal
+                if row2 == goal[0] and col2 == goal[1]:
+                    expand[row2][col2] = expand_count
+                    pprint(expand)
+                    return [g_value, row2, col2]
+
+                # Append to the list and check the grid
+                valid_list.append([g_value, row2, col2])
+                check[row2][col2] = 1
+                expand[row2][col2] = expand_count
+                expand_count += 1
         open_list = []
         for i in range(len(valid_list)):
             open_list.append(valid_list[i])
+
+    for row in range(len(expand)):
+        for col in range(len(expand[row])):
+            if check[row][col] == 0:
+                expand[row][col] = -1
+    pprint(expand)
     return 'fail'
 
-pprint(search())
-
+print search()
