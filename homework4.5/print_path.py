@@ -1,23 +1,31 @@
 from pprint import pprint
 # -----------
 # User Instructions:
-# 
-# Modify the function search() so that it returns
-# a table of values called expand. This table
-# will keep track of which step each node was
-# expanded.
 #
-# For grading purposes, please leave the return
-# statement at the bottom.
+# Modify the the search function so that it returns
+# a shortest path as follows:
+# 
+# [['>', 'v', ' ', ' ', ' ', ' '],
+#  [' ', '>', '>', '>', '>', 'v'],
+#  [' ', ' ', ' ', ' ', ' ', 'v'],
+#  [' ', ' ', ' ', ' ', ' ', 'v'],
+#  [' ', ' ', ' ', ' ', ' ', '*']]
+#
+# Where '>', '<', '^', and 'v' refer to right, left, 
+# up, and down motions. NOTE: the 'v' should be 
+# lowercase.
+#
+# Your function should be able to do this for any
+# provided grid, not just the sample grid below.
 # ----------
 
 
-grid = [[0, 0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 1, 0],
-        [0, 0, 1, 0, 1, 0],
-        [0, 0, 1, 0, 1, 0]]
-
+# Sample Test case
+grid = [[0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]]
 
 init = [0, 0]
 goal = [len(grid)-1, len(grid[0])-1]
@@ -31,7 +39,6 @@ delta_name = ['^', '<', 'v', '>']
 
 cost = 1
 
-
 # ----------------------------------------
 # modify code below
 # ----------------------------------------
@@ -43,8 +50,7 @@ def search():
     expand = [[-1 for row in range(len(grid[0]))] for col in range(len(grid))]
     count = 0
 
-    path = [[0 for row in range(len(grid[0]))] for col in range(len(grid))]
-    path[init[0]][init[1]] = 1
+    action = [[-1 for row in range(len(grid[0]))] for col in range(len(grid))]
 
     x = init[0]
     y = init[1]
@@ -55,10 +61,11 @@ def search():
     found = False  # flag that is set when search is complete
     resign = False # flag set if we can't find expand
 
+    path_list = []
     while not found and not resign:
         if len(open_list) == 0:
-            print 'fail'
             resign = True
+            return 'fail'
         else:
             open_list.sort()
             open_list.reverse()
@@ -71,7 +78,6 @@ def search():
 
             if x == goal[0] and y == goal[1]:
                 found = True
-                print [g, x, y]
             else:
                 for i in range(len(delta)):
                     x2 = x + delta[i][0]
@@ -81,6 +87,18 @@ def search():
                             g2 = g + cost
                             open_list.append([g2, x2, y2])
                             closed[x2][y2] = 1
-    return expand #Leave this line for grading purposes!
+                            action[x2][y2] = i
+    policy = [[' ' for row in range(len(grid[0]))] for col in range(len(grid))]
+    x = goal[0]
+    y = goal[1]
+    policy[x][y] = '*'
+    while x != init[0] or y != init[0]:
+        # Reverse the steps
+        x2 = x - delta[action[x][y]][0]
+        y2 = y - delta[action[x][y]][1]
+        policy[x2][y2] = delta_name[action[x][y]]
+        x = x2
+        y = y2
+    return policy #Leave this line for grading purposes!
 
 pprint(search())

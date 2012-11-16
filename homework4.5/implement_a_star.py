@@ -1,23 +1,36 @@
 from pprint import pprint
 # -----------
 # User Instructions:
-# 
-# Modify the function search() so that it returns
-# a table of values called expand. This table
-# will keep track of which step each node was
-# expanded.
 #
-# For grading purposes, please leave the return
-# statement at the bottom.
+# Modify the the search function so that it becomes
+# an A* search algorithm as defined in the previous
+# lectures.
+#
+# Your function should return the expanded grid
+# which shows, for each element, the count when
+# it was expanded or -1 if the element was never expanded.
+# In case the obstacles prevent reaching the goal,
+# the function should return "Fail"
+#
+# You do not need to modify the heuristic.
 # ----------
 
+grid = [[0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 0]]
 
-grid = [[0, 0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 1, 0],
-        [0, 0, 1, 0, 1, 0],
-        [0, 0, 1, 0, 1, 0]]
+# grid = [[0, 1, 0],
+#         [0, 1, 0],
+#         [0, 1, 0],
+#         [0, 1, 0]]
 
+heuristic = [[9, 8, 7, 6, 5, 4],
+            [8, 7, 6, 5, 4, 3],
+            [7, 6, 5, 4, 3, 2],
+            [6, 5, 4, 3, 2, 1],
+            [5, 4, 3, 2, 1, 0]]
 
 init = [0, 0]
 goal = [len(grid)-1, len(grid[0])-1]
@@ -31,7 +44,6 @@ delta_name = ['^', '<', 'v', '>']
 
 cost = 1
 
-
 # ----------------------------------------
 # modify code below
 # ----------------------------------------
@@ -41,37 +53,37 @@ def search():
     closed[init[0]][init[1]] = 1
 
     expand = [[-1 for row in range(len(grid[0]))] for col in range(len(grid))]
-    count = 0
+    action = [[-1 for row in range(len(grid[0]))] for col in range(len(grid))]
 
-    path = [[0 for row in range(len(grid[0]))] for col in range(len(grid))]
-    path[init[0]][init[1]] = 1
 
     x = init[0]
     y = init[1]
     g = 0
+    h = heuristic[x][y]
+    f = g + h
 
-    open_list = [[g, x, y]]
+    open = [[f, g, h, x, y]]
 
     found = False  # flag that is set when search is complete
     resign = False # flag set if we can't find expand
-
+    count = 0
+    
     while not found and not resign:
-        if len(open_list) == 0:
-            print 'fail'
+        if len(open) == 0:
             resign = True
+            return expand
         else:
-            open_list.sort()
-            open_list.reverse()
-            next = open_list.pop()
-            x = next[1]
-            y = next[2]
-            g = next[0]
+            open.sort()
+            open.reverse()
+            next = open.pop()
+            x = next[3]
+            y = next[4]
+            g = next[1]
             expand[x][y] = count
             count += 1
-
+            
             if x == goal[0] and y == goal[1]:
                 found = True
-                print [g, x, y]
             else:
                 for i in range(len(delta)):
                     x2 = x + delta[i][0]
@@ -79,8 +91,12 @@ def search():
                     if x2 >= 0 and x2 < len(grid) and y2 >=0 and y2 < len(grid[0]):
                         if closed[x2][y2] == 0 and grid[x2][y2] == 0:
                             g2 = g + cost
-                            open_list.append([g2, x2, y2])
+                            h2 = heuristic[x2][y2]
+                            f2 = g2 + h2
+                            open.append([f2, g2, h2, x2, y2])
                             closed[x2][y2] = 1
+    for i in range(len(expand)):
+        print expand[i]
     return expand #Leave this line for grading purposes!
 
-pprint(search())
+(search())
